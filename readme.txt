@@ -1,7 +1,6 @@
 Changes:
 - Added proper naming conventions for faces
 - Improved hand recognition
-- 
 
 
 Tests Passed:
