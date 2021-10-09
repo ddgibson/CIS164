@@ -198,16 +198,16 @@ void dealHand(vector<playingCard>& totalDeck, vector<playingCard> player, unsign
 //Display cards
 void displayCards(vector<playingCard> player, int amountOfCards) {
     for(int i = 0; i < amountOfCards; i++) {
-        if(player.at(i).face == 10){
+        if(player.at(i).face == 11){
             std::cout << 'J' << player.at(i).suit << ", ";
         }
-        else if(player.at(i).face == 11){
+        else if(player.at(i).face == 12){
             std::cout << 'Q' << player.at(i).suit << ", ";
         }
-        else if(player.at(i).face == 12){
+        else if(player.at(i).face == 13){
             std::cout << 'K' << player.at(i).suit << ", ";
         }
-        else if(player.at(i).face == 13){
+        else if(player.at(i).face == 14){
             std::cout << 'A' << player.at(i).suit << ", ";
         }
         else{
