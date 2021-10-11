@@ -11,6 +11,12 @@ struct playingCard{
     char suit;
 };
 
+struct player{
+    vector<playingCard> cards;
+    int chips = 1000;
+    vector<int> kicker;
+};
+
 /*
 class PlayerClass{
     private:

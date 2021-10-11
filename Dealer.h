@@ -91,11 +91,11 @@ int returnBestHand(vector<playingCard>& sortedHand);
 void displayCards(vector<playingCard> hand, int amountOfCards);
 bool isFlush(vector<char>& suit);
 bool isStraight(vector<int> sortedHand);
-bool isFourOfAKind(vector<int> sortedFace, vector<int>& kickerGrabber);
+bool isFourOfAKind(vector<int> sortedFace, vector<int>& kicker);
 bool isFullHouse(vector<int> sortedFace);
-bool isThreeOfAKind(vector<int> sortedFace);
-bool isTwoPair(vector<int> sortedFace);
-bool isPair(vector<int> sortedFace);
+bool isThreeOfAKind(vector<int> sortedFace, vector<int>& kicker);
+bool isTwoPair(vector<int> sortedFace, vector<int>& kicker);
+bool isPair(vector<int> sortedFace, vector<int>& kicker);
 
 
 
@@ -216,17 +216,129 @@ void displayCards(vector<playingCard> player, int amountOfCards) {
     }
 }
 
+int addBets(int& player1Chips, int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet){
+    int bet = 0;
+    int pool = 0;
+    int i = 0;
+
+    while(i == 0){
+        std::cout << "Player 1: " << std::endl;
+        std::cin >> bet;
+        if((player1Chips - bet) > 0){
+            player1Chips -= bet;
+            pool += bet;
+            playerOneCurrentBet += bet;
+            break;
+        }
+        else{
+            std::cout << "Too high of a bet" << std::endl;
+        }
+    }
+
+
+    while(i == 0){
+        std::cout << "Player 2: " << std::endl;
+        std::cin >> bet;
+        if((player1Chips - bet) > 0){
+            player2Chips -= bet;
+            pool += bet;
+            playerTwoCurrentBet += bet;
+            break;
+        }
+        else{
+            std::cout << "Too high of a bet" << std::endl;
+        }
+    }
+
+    return pool;
+}
+
+int betting(vector<playingCard> player, int& player1Chips, int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet) {
+    const int betRound2Cards = 3;
+    const int betRound3Cards = 4;
+    const int allCards = 5;
+    int pool = 0;
+
+    std::cout << "Please place your blind bets:" << std::endl;
+
+    pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet);
+
+    std::cout << "\nDealers's Cards: ";
+    for(int i = 0; i < betRound2Cards; i++) {
+        if(player.at(i).face == 11){
+            std::cout << 'J' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 12){
+            std::cout << 'Q' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 13){
+            std::cout << 'K' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 14){
+            std::cout << 'A' << player.at(i).suit << ", ";
+        }
+        else{
+            std::cout << player.at(i).face << player.at(i).suit << ", ";
+        }
+    }
+
+    std::cout << "\n\nPlease place your bets:" << std::endl;
+
+    pool += addBets(player1Chips, player2Chips,playerOneCurrentBet, playerTwoCurrentBet);
+
+    std::cout << "\nDealer's cards: ";
+    for(int i = 0; i < betRound3Cards; i++) {
+        if(player.at(i).face == 11){
+            std::cout << 'J' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 12){
+            std::cout << 'Q' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 13){
+            std::cout << 'K' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 14){
+            std::cout << 'A' << player.at(i).suit << ", ";
+        }
+        else{
+            std::cout << player.at(i).face << player.at(i).suit << ", ";
+        }
+    }
+
+    std::cout << "\n\nPlease place your bets:" << std::endl;
+
+    pool += addBets(player1Chips, player2Chips,playerOneCurrentBet, playerTwoCurrentBet);
+
+    std::cout << "\nDealer's full hand: ";
+    for(int i = 0; i < allCards; i++) {
+        if(player.at(i).face == 11){
+            std::cout << 'J' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 12){
+            std::cout << 'Q' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 13){
+            std::cout << 'K' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 14){
+            std::cout << 'A' << player.at(i).suit << ", ";
+        }
+        else{
+            std::cout << player.at(i).face << player.at(i).suit << ", ";
+        }
+    }
+    return pool;
+}
+
 
 //Checking Card Hands
-int returnBestHand(vector<playingCard> player, vector<playingCard> dealer) {
+int returnBestHand(vector<playingCard> player, vector<playingCard> dealer, vector<int>& kicker) {
     //player and dealer's face combined and sorted
     vector<int> sortedFace = sortFace(player,dealer);
     //player and dealer's face combined
     vector<int> combinedFaces = combineFace(player,dealer);
     //player and dealer's face combined
     vector<char> combinedSuits = combineSuit(player,dealer);
-    //kickers
-    vector<int> kicker;
     bool foundAce = findAce(player, dealer);
     int winningHand = 9;
     bool flush = false;
@@ -259,13 +371,13 @@ int returnBestHand(vector<playingCard> player, vector<playingCard> dealer) {
     else if(isStraight(sortedFace)) {
         winningHand = 5;
     }
-    else if(isThreeOfAKind(sortedFace)){
+    else if(isThreeOfAKind(sortedFace, kicker)){
         winningHand = 6;
     }
-    else if(isTwoPair(sortedFace)){
+    else if(isTwoPair(sortedFace, kicker)){
         winningHand = 7;
     }
-    else if(isPair(sortedFace)){
+    else if(isPair(sortedFace, kicker)){
         winningHand = 8;
     }
     else {
@@ -349,12 +461,14 @@ bool isStraight(vector<int> sortedFace){
 }
 
 //Checks if player has a four of a kind as a hand
-bool isFourOfAKind(vector<int> sortedFace, vector<int>& kickerGrabber){
+bool isFourOfAKind(vector<int> sortedFace, vector<int>& kickers){
     bool isFourOfAKind = false;
     int face = 0;
     int counter = 0;
-    int cardToDelete = 0;
-    vector<int> kickers;
+    int cardToDelete1 = 0;
+    int cardToDelete2 = 0;
+    int cardToDelete3 = 0;
+    int cardToDelete4 = 0;
 
     for(int i = 0; i < sortedFace.size(); i++){
         counter = 0;
@@ -362,17 +476,29 @@ bool isFourOfAKind(vector<int> sortedFace, vector<int>& kickerGrabber){
         for(int y = 1; y < sortedFace.size(); y++){
             if(face == sortedFace.at(y)){
                 ++counter;
+                if(counter == 1){
+                    cardToDelete1 = y;
+                }
+                if(counter == 2){
+                    cardToDelete2 = y;
+                }
+                if(counter == 3){
+                    cardToDelete3 = y;
+                }
                 if(counter == 4){
-                    cardToDelete = sortedFace.at(y);
+                    cardToDelete4 = y;
+                    sortedFace.erase(sortedFace.begin() + cardToDelete1);
+                    sortedFace.erase(sortedFace.begin() + cardToDelete2-1);
+                    sortedFace.erase(sortedFace.begin() + cardToDelete3-2);
+                    sortedFace.erase(sortedFace.begin() + cardToDelete4-3);
+
+                    kickers.push_back(sortedFace.at(2));
+                    kickers.push_back(sortedFace.at(1));
                     isFourOfAKind = true;
                 }
             }
         }
     }
-
-    // uses algorithm to remove four of a kind to get kicker
-    sortedFace.erase(std::remove(sortedFace.begin(), sortedFace.end(), cardToDelete), sortedFace.end());
-    kickerGrabber = sortedFace;
 
     return isFourOfAKind;
 };
@@ -427,12 +553,13 @@ bool isFullHouse(vector<int> sortedFace) {
 };
 
 //Checks if player has a three of a kind as a hand
-bool isThreeOfAKind(vector<int> sortedFace) {
+bool isThreeOfAKind(vector<int> sortedFace, vector<int>& kickers) {
     bool isThreeOfAKind = false;
     int face = 0;
     int counter = 0;
-    int cardToDelete = 0;
-    vector<int> kickers;
+    int cardToDelete1 = 0;
+    int cardToDelete2 = 0;
+    int cardToDelete3 = 0;
 
     for(int i = 0; i < sortedFace.size(); i++){
         counter = 0;
@@ -440,8 +567,22 @@ bool isThreeOfAKind(vector<int> sortedFace) {
         for(int y = 1; y < sortedFace.size(); y++){
             if(face == sortedFace.at(y)){
                 ++counter;
+                if(counter == 1){
+                    cardToDelete1 = y;
+                }
+                if(counter == 2){
+                    cardToDelete2 = y;
+                }
                 if(counter == 3){
-                    cardToDelete = sortedFace.at(y);
+                    cardToDelete3 = y;
+
+                    sortedFace.erase(sortedFace.begin() + cardToDelete1);
+                    sortedFace.erase(sortedFace.begin() + cardToDelete2-1);
+                    sortedFace.erase(sortedFace.begin() + cardToDelete3-2);
+
+                    kickers.push_back(sortedFace.at(3));
+                    kickers.push_back(sortedFace.at(2));
+
                     isThreeOfAKind = true;
                 }
             }
@@ -456,15 +597,13 @@ bool isThreeOfAKind(vector<int> sortedFace) {
 /* Sorts faces and then looks for similarities.
  * If a pair is found, the 1st pair is deleted
  * and searches for another. */
-bool isTwoPair(vector<int> sortedFace) {
+bool isTwoPair(vector<int> sortedFace, vector<int>& kickers) {
     bool isTwoPair = false;
     bool pair1 = false;
     bool pair2 = false;
     int face = 0;
     int counter = 0;
-    int cardToDelete = 0;
     int y = 1;
-    vector<int> kickers;
 
     for(int i = 0; i < sortedFace.size(); i++){
         if(pair1 == true){
@@ -476,8 +615,8 @@ bool isTwoPair(vector<int> sortedFace) {
             if(face == sortedFace.at(y)){
                 ++counter;
                 if(counter == 2){
-                    cardToDelete = sortedFace.at(y);
-                    sortedFace.erase(std::remove(sortedFace.begin(), sortedFace.end(), cardToDelete), sortedFace.end());
+                    sortedFace.erase(sortedFace.begin() + i);
+                    sortedFace.erase(sortedFace.begin() + y-1);
                     pair1 = true;
                     break;
                 }
@@ -495,7 +634,11 @@ bool isTwoPair(vector<int> sortedFace) {
                 if(face == sortedFace.at(y)){
                     ++counter;
                     if(counter == 2){
-                        cardToDelete = sortedFace.at(y);
+                        sortedFace.erase(sortedFace.begin() + i);
+                        sortedFace.erase(sortedFace.begin() + y-1);
+
+                        kickers.push_back(sortedFace.at(2));
+
                         pair2 = true;
                         break;
                     }
@@ -512,12 +655,11 @@ bool isTwoPair(vector<int> sortedFace) {
 };
 
 //Checks if player has a pair as a hand
-bool isPair(vector<int> sortedFace){
+bool isPair(vector<int> sortedFace, vector<int>& kickers){
     bool isPair = false;
     int face = 0;
     int counter = 0;
-    int cardToDelete = 0;
-    vector<int> kickers;
+    kickers.resize(0);
 
     for(int i = 0; i < sortedFace.size(); i++){
         counter = 0;
@@ -527,11 +669,19 @@ bool isPair(vector<int> sortedFace){
                 ++counter;
                 if(counter == 2){
                     isPair = true;
+
+                    sortedFace.erase(sortedFace.begin() + i);
+                    sortedFace.erase(sortedFace.begin() + y-1);
+
+                    kickers.push_back(sortedFace.at(4));
+                    kickers.push_back(sortedFace.at(3));
+                    kickers.push_back(sortedFace.at(2));
                     break;
                 }
             }
         }
     }
+
     return isPair;
 };
 
