@@ -216,120 +216,6 @@ void displayCards(vector<playingCard> player, int amountOfCards) {
     }
 }
 
-int addBets(int& player1Chips, int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet){
-    int bet = 0;
-    int pool = 0;
-    int i = 0;
-
-    while(i == 0){
-        std::cout << "Player 1: " << std::endl;
-        std::cin >> bet;
-        if((player1Chips - bet) > 0){
-            player1Chips -= bet;
-            pool += bet;
-            playerOneCurrentBet += bet;
-            break;
-        }
-        else{
-            std::cout << "Too high of a bet" << std::endl;
-        }
-    }
-
-
-    while(i == 0){
-        std::cout << "Player 2: " << std::endl;
-        std::cin >> bet;
-        if((player1Chips - bet) > 0){
-            player2Chips -= bet;
-            pool += bet;
-            playerTwoCurrentBet += bet;
-            break;
-        }
-        else{
-            std::cout << "Too high of a bet" << std::endl;
-        }
-    }
-
-    return pool;
-}
-
-int betting(vector<playingCard> player, int& player1Chips, int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet) {
-    const int betRound2Cards = 3;
-    const int betRound3Cards = 4;
-    const int allCards = 5;
-    int pool = 0;
-
-    std::cout << "Please place your blind bets:" << std::endl;
-
-    pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet);
-
-    std::cout << "\nDealers's Cards: ";
-    for(int i = 0; i < betRound2Cards; i++) {
-        if(player.at(i).face == 11){
-            std::cout << 'J' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 12){
-            std::cout << 'Q' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 13){
-            std::cout << 'K' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 14){
-            std::cout << 'A' << player.at(i).suit << ", ";
-        }
-        else{
-            std::cout << player.at(i).face << player.at(i).suit << ", ";
-        }
-    }
-
-    std::cout << "\n\nPlease place your bets:" << std::endl;
-
-    pool += addBets(player1Chips, player2Chips,playerOneCurrentBet, playerTwoCurrentBet);
-
-    std::cout << "\nDealer's cards: ";
-    for(int i = 0; i < betRound3Cards; i++) {
-        if(player.at(i).face == 11){
-            std::cout << 'J' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 12){
-            std::cout << 'Q' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 13){
-            std::cout << 'K' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 14){
-            std::cout << 'A' << player.at(i).suit << ", ";
-        }
-        else{
-            std::cout << player.at(i).face << player.at(i).suit << ", ";
-        }
-    }
-
-    std::cout << "\n\nPlease place your bets:" << std::endl;
-
-    pool += addBets(player1Chips, player2Chips,playerOneCurrentBet, playerTwoCurrentBet);
-
-    std::cout << "\nDealer's full hand: ";
-    for(int i = 0; i < allCards; i++) {
-        if(player.at(i).face == 11){
-            std::cout << 'J' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 12){
-            std::cout << 'Q' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 13){
-            std::cout << 'K' << player.at(i).suit << ", ";
-        }
-        else if(player.at(i).face == 14){
-            std::cout << 'A' << player.at(i).suit << ", ";
-        }
-        else{
-            std::cout << player.at(i).face << player.at(i).suit << ", ";
-        }
-    }
-    return pool;
-}
-
 
 //Checking Card Hands
 int returnBestHand(vector<playingCard> player, vector<playingCard> dealer, vector<int>& kicker) {
@@ -386,6 +272,189 @@ int returnBestHand(vector<playingCard> player, vector<playingCard> dealer, vecto
     return winningHand;
 
 };
+
+//Player 2AI Bet
+int aiBet(int& totalChips, vector<playingCard>& playerHand, vector<playingCard> dealerCards,
+          vector<int> kicker, int roundNumber ){
+    //Variables
+    int betPercent;
+    int randomPercentIncrease;
+    int winningHand;
+    int bet;
+//    cout << playerHand.at(0).face << " " << playerHand.at(1).face << endl;
+
+    //If on first round (no community cards turned) check if ai has pair and bet accordingly
+    if(roundNumber == 0){
+        if(playerHand.at(0).face == playerHand.at(1).face){
+            //determine how high of a pair player has
+            int highCardValue = playerHand.at(0).face;
+            //Make bigger bet depending on how high the pair is
+            if(highCardValue < 5){
+                betPercent = 5;
+            } else if(highCardValue < 10){
+                betPercent = 10;
+            } else if(highCardValue < 14){
+                betPercent = 20;
+            } else {
+                betPercent = 30;
+            }
+            randomPercentIncrease = rand() % (60 - betPercent);
+            betPercent = betPercent + randomPercentIncrease;
+        } else {
+            betPercent = 0;
+        }
+    }
+    //if cards are on the table, evaluate ai player's hand and bet accordingly
+    else{
+        winningHand = returnBestHand(playerHand, dealerCards, kicker);
+        cout << "Winning hand: " << winningHand << endl;
+        //Go all in if player has royal flush, straight flush, or 4 of a kind
+       if(winningHand < 3){
+           betPercent = 100;
+       } else {
+           //Make random percentage increase for sake of chance
+           randomPercentIncrease = rand() % winningHand;
+           //Formula to generate percentage of chips player will bet
+           betPercent = ((10 - winningHand) * 10) + (randomPercentIncrease * (10 - roundNumber));
+       }
+    }
+    bet = (betPercent/100.00) * totalChips;
+    return bet;
+}
+
+int addBets(int& player1Chips, int& player2Chips, int& playerOneCurrentBet,
+            int& playerTwoCurrentBet, vector<playingCard>& playerTwoHand,
+            vector<playingCard>& dealerCards, vector<int>& kicker, int roundNumber){
+    int bet = 0;
+    int pool = 0;
+    int i = 0;
+
+    while(i == 0){
+        std::cout << "Player 1: " << std::endl;
+        std::cin >> bet;
+        if((player1Chips - bet) > 0){
+            player1Chips -= bet;
+            pool += bet;
+            playerOneCurrentBet += bet;
+            break;
+        }
+        else{
+            std::cout << "Too high of a bet" << std::endl;
+        }
+    }
+
+
+    while(i == 0){
+        std::cout << "Player 2: " << std::endl;
+//        std::cin >> bet;
+        //int aIBet(int& totalChips, vector<playingCard>& playerHand, vector<playingCard> dealerCards,
+       // vector<int> kicker, int roundNumber )
+        bet = aiBet(player2Chips, playerTwoHand, dealerCards, kicker, roundNumber);
+        if((player1Chips - bet) > 0){
+            player2Chips -= bet;
+            pool += bet;
+            playerTwoCurrentBet += bet;
+            cout << bet << endl;
+            break;
+        }
+        else{
+            std::cout << "Too high of a bet" << std::endl;
+        }
+    }
+
+    return pool;
+}
+
+int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
+            vector<playingCard>& dealerCards, int& player1Chips,
+            int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet,
+            vector<int>& kicker) {
+    const int betRound2Cards = 3;
+    const int betRound3Cards = 4;
+    const int allCards = 5;
+    int pool = 0;
+    int roundNumber = 0;
+
+    std::cout << "Please place your blind bets:" << std::endl;
+
+    pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet, playerTwoHand, dealerCards, kicker, roundNumber);
+
+    std::cout << "\nDealers's Cards: ";
+    for(int i = 0; i < betRound2Cards; i++) {
+        if(player.at(i).face == 11){
+            std::cout << 'J' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 12){
+            std::cout << 'Q' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 13){
+            std::cout << 'K' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 14){
+            std::cout << 'A' << player.at(i).suit << ", ";
+        }
+        else{
+            std::cout << player.at(i).face << player.at(i).suit << ", ";
+        }
+    }
+
+    //increment round number
+    roundNumber++;
+    std::cout << "\n\nPlease place your bets:" << std::endl;
+
+       pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet, playerTwoHand, dealerCards, kicker, roundNumber);
+
+    std::cout << "\nDealer's cards: ";
+    for(int i = 0; i < betRound3Cards; i++) {
+        if(player.at(i).face == 11){
+            std::cout << 'J' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 12){
+            std::cout << 'Q' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 13){
+            std::cout << 'K' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 14){
+            std::cout << 'A' << player.at(i).suit << ", ";
+        }
+        else{
+            std::cout << player.at(i).face << player.at(i).suit << ", ";
+        }
+    }
+    roundNumber++;
+
+    std::cout << "\n\nPlease place your bets:" << std::endl;
+
+        pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet, playerTwoHand, dealerCards, kicker, roundNumber);
+    std::cout << "\nDealer's full hand: ";
+    for(int i = 0; i < allCards; i++) {
+        if(player.at(i).face == 11){
+            std::cout << 'J' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 12){
+            std::cout << 'Q' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 13){
+            std::cout << 'K' << player.at(i).suit << ", ";
+        }
+        else if(player.at(i).face == 14){
+            std::cout << 'A' << player.at(i).suit << ", ";
+        }
+        else{
+            std::cout << player.at(i).face << player.at(i).suit << ", ";
+        }
+    }
+
+    std::cout << "\n\nPlease place your bets:" << std::endl;
+
+        pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet, playerTwoHand, dealerCards, kicker, roundNumber);
+    return pool;
+}
+
+
+
+
 
 
 //Functions to check for individual hands

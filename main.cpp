@@ -81,7 +81,16 @@ while(continueVar == 1){
     cout << endl;
     std::cout << "Player 2 Bets: " << playerTwo.chips << std::endl;
     cout << "\n";
-    pool = betting(dealerDeck, playerOne.chips, playerTwo.chips, playerOneCurrentBet, playerTwoCurrentBet);
+
+    /*
+     * int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
+            vector<playingCard>& dealerCards, int& player1Chips,
+            int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet,
+            vector<int>& kicker)
+            */
+    pool = betting(dealerDeck, playerTwo.cards,
+                   dealerDeck, playerOne.chips, playerTwo.chips, playerOneCurrentBet, playerTwoCurrentBet,
+                   playerTwo.kicker);
     cout << endl;
 
     //Determine what points players have
@@ -158,7 +167,7 @@ while(continueVar == 1){
     cout << endl << "Try Again?" << endl;
     cout << "[1] To Try Again" << endl;
     cin >> continueVar;
-	
+
     //Empty player and deck hand
     //player 1
     playerOne.cards.clear();
