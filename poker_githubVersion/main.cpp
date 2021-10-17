@@ -1,10 +1,16 @@
 //created by apestotnik, 9/24/21
+//Last eited October 17th
+//      UPDATED FORMATTING OF OUTPUT -- Derek Gibson
+//      UPDATED Hand Evaluation for Pair, Three of a Kind, 2 Pair -- Derek Gibson
+
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include "Player.h"
 #include "Dealer.h"
+#include <iomanip>
 using namespace std;
 
 int main()
@@ -50,7 +56,19 @@ int main()
     generateDeck(totalDeck);
 
     int continueVar = 0;
-    cout << "Welcome to the Poker Simulator!" << endl << endl;
+
+    cout << "        Welcome to the Poker Simulator!       |" << endl;
+    cout << "-----------------------------------------------" << endl;
+    cout <<  "                              _____           |\n"
+"                      _____  |K  WW|          |\n"
+"              _____  |Q  ww| |   {)|          |\n"
+"       _____ |J  ww| |   {(| |(v)%%| _____    |\n"
+"      |10 v ||   {)| |(v)%%| | v%%%||A_ _ |   |\n"
+"      |v v v||(v)% | | v%%%| |_%%%>||( v )|   |\n"
+"      |v v v|| v % | |_%%%O|        |  \ / |   |\n"
+"      |v v v||__%%[|                |  .  |   |\n"
+"      |___0I|                       |____V|   |\n";
+    cout << "-----------------------------------------------" << endl;
     cout <<"Deal Hands?" << endl;
     cout << "[1] To Deal" << endl;
     cin >> continueVar;
@@ -76,15 +94,13 @@ while(continueVar == 1){
     bool player1Folds = false;
     bool player2Folds = false;
     //Display Player's Cards
-    cout << "Player 1 : ";
+    cout<<"Player 1 : "<<setw(25)<< "Player 2 : "<<setw(25)<<"\n";
+    std::cout << "Chips: " << playerOne.chips << setw(21) << "Chips: " << playerTwo.chips << std::endl;
+
     displayCards(playerOne.cards, amountOfPlayerCards);
-    cout << endl;
-    std::cout << "Player 1 Chips: " << playerOne.chips << std::endl;
-    cout << "Player 2 : ";
+    cout << setw(18);
     displayCards(playerTwo.cards, amountOfPlayerCards);
-    cout << endl;
-    std::cout << "Player 2 Chips: " << playerTwo.chips << std::endl;
-    cout << "\n";
+    cout << "\n" << endl;
 
     /*
      * int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
@@ -92,7 +108,7 @@ while(continueVar == 1){
             int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet,
             vector<int>& kicker)
             */
-    pool = betting(dealerDeck, playerTwo.cards,
+    pool = betting(dealerDeck, playerOne.cards, playerTwo.cards,
                    dealerDeck, playerOne.chips, playerTwo.chips, playerOneCurrentBet, playerTwoCurrentBet,
                    playerTwo.kicker, player1Folds, player2Folds);
     cout << endl;
@@ -204,6 +220,3 @@ while(continueVar == 1){
 
     return 0;
 }
-
-
-

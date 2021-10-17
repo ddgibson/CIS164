@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <time.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -281,7 +282,7 @@ int aiBet(int& totalChips, vector<playingCard>& playerHand, vector<playingCard> 
 }
 
 int addBets(int& player1Chips, int& player2Chips, int& playerOneCurrentBet,
-            int& playerTwoCurrentBet, vector<playingCard>& playerTwoHand,
+            int& playerTwoCurrentBet, vector<playingCard>& playerOneHand, vector<playingCard>& playerTwoHand,
             vector<playingCard>& dealerCards, vector<int>& kicker, int roundNumber,
             bool& player1Folded, bool& player2Folded){
     int bet = 0;
@@ -293,7 +294,12 @@ int addBets(int& player1Chips, int& player2Chips, int& playerOneCurrentBet,
 
     //ai bet
     while(i == 0){
-        std::cout << "Player 2: " << std::endl;
+        cout<<"Player 1 : "<<setw(25)<< "Player 2 : "<<setw(25)<<"\n";
+        std::cout << "Chips: " << player1Chips << setw(21) << "Chips: " << player2Chips << std::endl;
+        displayCards(playerOneHand, 2);
+        cout << setw(18);
+        displayCards(playerTwoHand, 2);
+        cout << "\n" << endl;
         bet = aiBet(player2Chips, playerTwoHand, dealerCards, kicker, roundNumber);
         //Make sure AI Player has enough chips for the bet
         if((player2Chips - bet) >= 0){
@@ -383,7 +389,7 @@ int addBets(int& player1Chips, int& player2Chips, int& playerOneCurrentBet,
     return pool;
 }
 
-int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
+int betting(vector<playingCard> player, vector<playingCard>& playerOneHand, vector<playingCard>& playerTwoHand,
             vector<playingCard>& dealerCards, int& player1Chips,
             int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet,
             vector<int>& kicker, bool& player1Folded, bool& player2Folded) {
@@ -392,11 +398,10 @@ int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
     const int allCards = 5;
     int pool = 0;
     int roundNumber = 0;
-
     std::cout << "Please place your blind bets:" << std::endl;
 
     pool += addBets(player1Chips, player2Chips, playerOneCurrentBet,
-                    playerTwoCurrentBet, playerTwoHand, dealerCards,
+                    playerTwoCurrentBet, playerOneHand, playerTwoHand, dealerCards,
                     kicker, roundNumber, player1Folded, player2Folded);
 
     //Continue if neither player has folded
@@ -430,7 +435,7 @@ int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
     std::cout << "\n\nPlease place your bets:" << std::endl;
 
     pool += addBets(player1Chips, player2Chips, playerOneCurrentBet,
-                    playerTwoCurrentBet, playerTwoHand, dealerCards,
+                    playerTwoCurrentBet, playerOneHand, playerTwoHand, dealerCards,
                     kicker, roundNumber, player1Folded, player2Folded);
     }
 
@@ -462,7 +467,7 @@ int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
 
 
     pool += addBets(player1Chips, player2Chips, playerOneCurrentBet,
-                    playerTwoCurrentBet, playerTwoHand, dealerCards,
+                    playerTwoCurrentBet, playerOneHand, playerTwoHand, dealerCards,
                     kicker, roundNumber, player1Folded, player2Folded);
     }
 
@@ -492,7 +497,7 @@ int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
     std::cout << "\n\nPlease place your bets:" << std::endl;
 
     pool += addBets(player1Chips, player2Chips, playerOneCurrentBet,
-                    playerTwoCurrentBet, playerTwoHand, dealerCards,
+                    playerTwoCurrentBet, playerOneHand, playerTwoHand, dealerCards,
                     kicker, roundNumber, player1Folded, player2Folded);
     }
     }
