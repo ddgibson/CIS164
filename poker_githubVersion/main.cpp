@@ -40,13 +40,14 @@ int main()
 
     int playerOneBestHand = 9;
     int playerTwoBestHand = 9;
-    int playerOneCurrentBet = 0;
-    int playerTwoCurrentBet = 0;
     const int amountOfDealerCards = 5;
     const int amountOfPlayerCards = 2;
     srand((unsigned int)time(NULL));
     int pool = 0;
     int bust = 0;
+    vector<playingCard> totalDeck;
+    //Generate Deck of cards
+    generateDeck(totalDeck);
 
     int continueVar = 0;
     cout << "Welcome to the Poker Simulator!" << endl << endl;
@@ -55,14 +56,16 @@ int main()
     cin >> continueVar;
 
 while(continueVar == 1){
+    int playerOneCurrentBet = 0;
+    int playerTwoCurrentBet = 0;
     //Generate Dealer's Deck
     #ifndef test
-    generateDeck(dealerDeck, amountOfDealerCards);
+    dealHand(totalDeck, dealerDeck, amountOfDealerCards);
     //Generate player's Deck
     //player 1
-    generateDeck(playerOne.cards, amountOfPlayerCards);
+    dealHand(totalDeck, playerOne.cards, amountOfPlayerCards);
     //player 2
-    generateDeck(playerTwo.cards, amountOfPlayerCards);
+    dealHand(totalDeck, playerTwo.cards, amountOfPlayerCards);
     #endif
 
     /*
@@ -70,16 +73,17 @@ while(continueVar == 1){
     dealHand(cardDeck, playerOne, 2);
     dealHand(cardDeck, playerTwo, 2);
     */
-
+    bool player1Folds = false;
+    bool player2Folds = false;
     //Display Player's Cards
     cout << "Player 1 : ";
     displayCards(playerOne.cards, amountOfPlayerCards);
     cout << endl;
-    std::cout << "Player 1 Bets: " << playerOne.chips << std::endl;
+    std::cout << "Player 1 Chips: " << playerOne.chips << std::endl;
     cout << "Player 2 : ";
     displayCards(playerTwo.cards, amountOfPlayerCards);
     cout << endl;
-    std::cout << "Player 2 Bets: " << playerTwo.chips << std::endl;
+    std::cout << "Player 2 Chips: " << playerTwo.chips << std::endl;
     cout << "\n";
 
     /*
@@ -90,7 +94,7 @@ while(continueVar == 1){
             */
     pool = betting(dealerDeck, playerTwo.cards,
                    dealerDeck, playerOne.chips, playerTwo.chips, playerOneCurrentBet, playerTwoCurrentBet,
-                   playerTwo.kicker);
+                   playerTwo.kicker, player1Folds, player2Folds);
     cout << endl;
 
     //Determine what points players have
@@ -98,6 +102,14 @@ while(continueVar == 1){
     playerOneBestHand = returnBestHand(playerOne.cards, dealerDeck, playerOne.kicker);
     //player 2
     playerTwoBestHand = returnBestHand(playerTwo.cards, dealerDeck, playerTwo.kicker);
+
+    if(player1Folds){
+        playerTwo.chips += pool;
+        cout << "Player 1 folded" << endl;
+    } else if(player2Folds){
+        playerOne.chips += pool;
+               cout << "Player 2 folded" << endl;
+    } else {
 
     //Check which player has better hand (lower number in is better hand)
     if(playerOneBestHand < playerTwoBestHand) {
@@ -146,6 +158,7 @@ while(continueVar == 1){
         playerOne.chips += playerOneCurrentBet;
         playerTwo.chips += playerTwoCurrentBet;
     }
+    }
     //Start comparing high cards if both players have same point
     /*
     else {
@@ -164,6 +177,14 @@ while(continueVar == 1){
         }
     }
     */
+    if(playerOne.chips == bust){
+        std::cout << "Player 1 is bust, game over" << std::endl;
+        break;
+    }
+    else if(playerTwo.chips == bust){
+        std::cout << "Player 2 is bust, game over" << std::endl;
+        break;
+    }
     cout << endl << "Try Again?" << endl;
     cout << "[1] To Try Again" << endl;
     cin >> continueVar;
@@ -178,14 +199,7 @@ while(continueVar == 1){
     dealerDeck.clear();
     pool = 0;
 
-    if(playerOne.chips == bust){
-        std::cout << "Player 1 is bust, game over" << std::endl;
-        break;
-    }
-    else if(playerTwo.chips == bust){
-        std::cout << "Player 2 is bust, game over" << std::endl;
-        break;
-    }
+
 }
 
     return 0;

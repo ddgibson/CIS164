@@ -98,101 +98,56 @@ bool isTwoPair(vector<int> sortedFace, vector<int>& kicker);
 bool isPair(vector<int> sortedFace, vector<int>& kicker);
 
 
-
 //Function to create a deck of cards
-void generateDeck(vector<playingCard>& deckToCreate, int cards) {
+void generateDeck(vector<playingCard>& deckToCreate) {
+    char currentSuit;
+    playingCard currentCard;
+    //Assign each card a value and suit
+    for(unsigned int i = 2; i < 15; ++i){
+        //Determine Suit
+        for(unsigned int suitVar = 0; suitVar < 4; suitVar++){
 
-        playingCard currentCard;
+            //Assign Suit
+            switch(suitVar) {
+                case 0 :
+                    currentSuit = 'D';
+                break;
+            case 1 :
+                    currentSuit = 'H';
+                break;
+            case 2 :
+                currentSuit = 'C';
+                break;
+            case 3 :
+                currentSuit = 'S';
+                break;
+            default :
+                currentSuit = 'I';
+            }
 
-        for(int i = 0; i < cards; i++){
-        //Assign each card a value and suit
-        int randomFace = rand() % 14 + 2;
-        int randomSuit = rand() % 4 + 1;
+            currentCard.face = i;
+            currentCard.suit = currentSuit;
 
-        //Gives random face
-        switch(randomFace){
-            case 2:
-            currentCard.face = 2;
-            break;
-            case 3:
-            currentCard.face = 3;
-            break;
-            case 4:
-            currentCard.face = 4;
-            break;
-            case 5:
-            currentCard.face = 5;
-            break;
-            case 6:
-            currentCard.face = 6;
-            break;
-            case 7:
-            currentCard.face = 7;
-            break;
-            case 8:
-            currentCard.face = 8;
-            break;
-            case 9:
-            currentCard.face = 9;
-            break;
-            case 10:
-            currentCard.face = 10;
-            break;
-            case 11:
-            currentCard.face = 11;
-            break;
-            case 12:
-            currentCard.face = 12;
-            break;
-            case 13:
-            currentCard.face = 13;
-            break;
-            case 14:
-            currentCard.face = 14;
-            break;
+            //Add current card to vector
+            deckToCreate.push_back(currentCard);
         }
-
-        //Gives random suit
-        switch (randomSuit) {
-            case 1:
-            currentCard.suit = 'H';
-            break;
-            case 2:
-            currentCard.suit = 'D';
-            break;
-            case 3:
-            currentCard.suit  = 'C';
-            break;
-            case 4:
-            currentCard.suit = 'S';
-            break;
-        }
-
-        deckToCreate.push_back(currentCard);
     }
-
-    //Add current card to vector
-
 
 }
 
 //Function to deal cards out of main deck -- removes cards from main deck and adds them to hand
-/*
-void dealHand(vector<playingCard>& totalDeck, vector<playingCard> player, unsigned int handSize) {
-    //seed for random number
-    srand (time(NULL));
+void dealHand(vector<playingCard>& totalDeck, vector<playingCard>& handToDeal, unsigned int handSize) {
     unsigned int randomInt;
     //take cards from totalDeck
     for( unsigned int i = 0; i < handSize; i++) {
         //Generate Random Number
         randomInt = rand() % totalDeck.size();
         //Add card from total deck at the random index to the new hand
-        player.setPlayerHand(totalDeck.at(randomInt));
+        handToDeal.push_back(totalDeck.at(randomInt));
         //Remove card from total deck
         totalDeck.erase(totalDeck.begin() + randomInt);
     }
 }
-*/
 
 
 //Display cards
@@ -307,7 +262,7 @@ int aiBet(int& totalChips, vector<playingCard>& playerHand, vector<playingCard> 
     //if cards are on the table, evaluate ai player's hand and bet accordingly
     else{
         winningHand = returnBestHand(playerHand, dealerCards, kicker);
-        cout << "Winning hand: " << winningHand << endl;
+//        cout << "Winning hand: " << winningHand << endl;
         //Go all in if player has royal flush, straight flush, or 4 of a kind
        if(winningHand < 3){
            betPercent = 100;
@@ -315,7 +270,10 @@ int aiBet(int& totalChips, vector<playingCard>& playerHand, vector<playingCard> 
            //Make random percentage increase for sake of chance
            randomPercentIncrease = rand() % winningHand;
            //Formula to generate percentage of chips player will bet
-           betPercent = ((10 - winningHand) * 10) + (randomPercentIncrease * (10 - roundNumber));
+           betPercent = ((10 - (winningHand + 1)) * 10);
+           if(winningHand < 7){
+               betPercent += (randomPercentIncrease * (10 - roundNumber));
+           }
        }
     }
     bet = (betPercent/100.00) * totalChips;
@@ -324,37 +282,30 @@ int aiBet(int& totalChips, vector<playingCard>& playerHand, vector<playingCard> 
 
 int addBets(int& player1Chips, int& player2Chips, int& playerOneCurrentBet,
             int& playerTwoCurrentBet, vector<playingCard>& playerTwoHand,
-            vector<playingCard>& dealerCards, vector<int>& kicker, int roundNumber){
+            vector<playingCard>& dealerCards, vector<int>& kicker, int roundNumber,
+            bool& player1Folded, bool& player2Folded){
     int bet = 0;
     int pool = 0;
     int i = 0;
+    int opponentBet = 0;
+    int responseVar;
+    int raiseBy = 0;
 
-    while(i == 0){
-        std::cout << "Player 1: " << std::endl;
-        std::cin >> bet;
-        if((player1Chips - bet) > 0){
-            player1Chips -= bet;
-            pool += bet;
-            playerOneCurrentBet += bet;
-            break;
-        }
-        else{
-            std::cout << "Too high of a bet" << std::endl;
-        }
-    }
-
-
+    //ai bet
     while(i == 0){
         std::cout << "Player 2: " << std::endl;
-//        std::cin >> bet;
-        //int aIBet(int& totalChips, vector<playingCard>& playerHand, vector<playingCard> dealerCards,
-       // vector<int> kicker, int roundNumber )
         bet = aiBet(player2Chips, playerTwoHand, dealerCards, kicker, roundNumber);
-        if((player1Chips - bet) > 0){
+        //Make sure AI Player has enough chips for the bet
+        if((player2Chips - bet) >= 0){
+        //If bet is more chips than player1 has, change bet to be max amount of chips that player1 has
+            if(player1Chips - bet < 0){
+                bet = player1Chips;
+            }
             player2Chips -= bet;
             pool += bet;
             playerTwoCurrentBet += bet;
-            cout << bet << endl;
+            cout << "Player 2 bets: " << bet << endl;
+            opponentBet = bet;
             break;
         }
         else{
@@ -362,13 +313,80 @@ int addBets(int& player1Chips, int& player2Chips, int& playerOneCurrentBet,
         }
     }
 
+    while(i == 0){
+        if(opponentBet >= player1Chips) {
+            std::cout << "Opponent's bet will put you all in. Do you wish to call[1], or fold[0]?" << endl;
+            std::cin >> responseVar;
+            while(responseVar < 0 || responseVar > 2){
+                std::cout << "Sorry, that was not an option" << endl;
+                std::cout << "Player 1: Do you wish to call[1], or fold[0]?" << std::endl;
+                cin >> responseVar;
+            }
+        } else{
+        std::cout << "Player 1: Do you wish to call[1], raise[2], or fold[0]?" << std::endl;
+        std::cin >> responseVar;
+        while(responseVar < 0 || responseVar > 3){
+            std::cout << "Sorry, that was not an option" << endl;
+            std::cout << "Player 1: Do you wish to call[1], raise[2], or fold[0]?" << std::endl;
+            cin >> responseVar;
+        }
+        }
+        if(responseVar == 1){
+            bet = opponentBet;
+            cout << "You called the bet of: " << opponentBet;
+        } else if (responseVar == 2) {
+            std::cout << "How much do you wish to raise by?" << endl;
+            std::cin >> raiseBy;
+
+            while(opponentBet + raiseBy > player1Chips){
+                std::cout << "Sorry, you do not have enough chips to raise by that much" << endl;
+                std::cout << "How much do you wish to raise by?" << endl;
+                std::cin >> raiseBy;
+            }
+
+            //If player tries to raise by more chips than opponent has, change bet to just put ai all in
+            while(raiseBy > player2Chips){
+                std::cout << "Opponent does not have that many chips" << endl;
+                std::cout << "Bet will be reduced to " << player2Chips << " to put opponent all in" << endl;
+                raiseBy = player2Chips;
+            }
+            bet = opponentBet + raiseBy;
+        }
+        else {
+            std::cout << "You folded" << endl;
+            player1Folded = true;
+            break;
+        }
+
+        if((player1Chips - bet) >= 0){
+            player1Chips -= bet;
+            pool += bet;
+            playerOneCurrentBet += bet;
+            if(playerOneCurrentBet > playerTwoCurrentBet) {
+                int playerTwoCalls = (rand() % 6) + 1;
+                if(playerTwoCalls <= 2) {
+                    cout << "Player 2 Folds " << endl;
+                    player2Folded = true;
+                } else {
+                    cout << "Player 2 calls your bet " << endl;
+                    player2Chips -= raiseBy;
+                    pool += raiseBy;
+                    playerTwoCurrentBet += raiseBy;
+                }
+            }
+            break;
+        }
+        else{
+            std::cout << "Too high of a bet" << std::endl;
+        }
+    }
     return pool;
 }
 
 int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
             vector<playingCard>& dealerCards, int& player1Chips,
             int& player2Chips, int& playerOneCurrentBet, int& playerTwoCurrentBet,
-            vector<int>& kicker) {
+            vector<int>& kicker, bool& player1Folded, bool& player2Folded) {
     const int betRound2Cards = 3;
     const int betRound3Cards = 4;
     const int allCards = 5;
@@ -377,8 +395,12 @@ int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
 
     std::cout << "Please place your blind bets:" << std::endl;
 
-    pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet, playerTwoHand, dealerCards, kicker, roundNumber);
+    pool += addBets(player1Chips, player2Chips, playerOneCurrentBet,
+                    playerTwoCurrentBet, playerTwoHand, dealerCards,
+                    kicker, roundNumber, player1Folded, player2Folded);
 
+    //Continue if neither player has folded
+    if(!(player1Folded || player2Folded)){
     std::cout << "\nDealers's Cards: ";
     for(int i = 0; i < betRound2Cards; i++) {
         if(player.at(i).face == 11){
@@ -397,12 +419,20 @@ int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
             std::cout << player.at(i).face << player.at(i).suit << ", ";
         }
     }
+    }
 
     //increment round number
     roundNumber++;
+
+    //Continue if neither player has folded
+    if(!(player1Folded || player2Folded)){
+            if(player1Chips > 0 && player2Chips > 0){
     std::cout << "\n\nPlease place your bets:" << std::endl;
 
-       pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet, playerTwoHand, dealerCards, kicker, roundNumber);
+    pool += addBets(player1Chips, player2Chips, playerOneCurrentBet,
+                    playerTwoCurrentBet, playerTwoHand, dealerCards,
+                    kicker, roundNumber, player1Folded, player2Folded);
+    }
 
     std::cout << "\nDealer's cards: ";
     for(int i = 0; i < betRound3Cards; i++) {
@@ -422,11 +452,20 @@ int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
             std::cout << player.at(i).face << player.at(i).suit << ", ";
         }
     }
+    }
     roundNumber++;
 
+    //Continue if neither player has folded
+    if(!(player1Folded || player2Folded)){
+            if(player1Chips > 0 && player2Chips > 0){
     std::cout << "\n\nPlease place your bets:" << std::endl;
 
-        pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet, playerTwoHand, dealerCards, kicker, roundNumber);
+
+    pool += addBets(player1Chips, player2Chips, playerOneCurrentBet,
+                    playerTwoCurrentBet, playerTwoHand, dealerCards,
+                    kicker, roundNumber, player1Folded, player2Folded);
+    }
+
     std::cout << "\nDealer's full hand: ";
     for(int i = 0; i < allCards; i++) {
         if(player.at(i).face == 11){
@@ -445,10 +484,19 @@ int betting(vector<playingCard> player, vector<playingCard>& playerTwoHand,
             std::cout << player.at(i).face << player.at(i).suit << ", ";
         }
     }
+    }
 
+    //Continue if neither player has folded
+    if(!(player1Folded || player2Folded)){
+         if(player1Chips > 0 && player2Chips > 0){
     std::cout << "\n\nPlease place your bets:" << std::endl;
 
-        pool += addBets(player1Chips, player2Chips, playerOneCurrentBet, playerTwoCurrentBet, playerTwoHand, dealerCards, kicker, roundNumber);
+    pool += addBets(player1Chips, player2Chips, playerOneCurrentBet,
+                    playerTwoCurrentBet, playerTwoHand, dealerCards,
+                    kicker, roundNumber, player1Folded, player2Folded);
+    }
+    }
+
     return pool;
 }
 
